@@ -1,0 +1,10 @@
+3 (1).txt",			#Camilo Ruiz
+3.txt", 			#Tonny Gualdron
+9.9.txt", 			#Felipe Rodriguez
+15,6.txt",			#David Ruiz
+99", 				#Sergio Sepulveda
+coords5FWHM.txt",		# Daniel Galindo
+datos_333333333", 		#Carlos Cordoba
+dos.dat",			#Carlos Barreto
+magnitudesbenjaminfinal", 	#Johanns Canaval
+mag2 (1)"			#Ana Maria Montaña
