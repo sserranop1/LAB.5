@@ -114,6 +114,63 @@ pares_cercanos = pd.DataFrame(pares_cercanos)
 pares_cercanos.to_csv("m92011_pares_vecino_cercano.csv", index=False)
 
 # =====================================================
+# GRAFICAR NÚMERO DE ESTRELLAS VS RADIO DE APERTURA
+# Respecto a la distancia de cada estrella a su vecino más cercano.
+# =====================================================
+radios_apertura = np.linspace(
+    0,
+    df["dist_vecino_mas_cercano"].max(),
+    300
+)
+numero_estrellas = np.array([
+    (df["dist_vecino_mas_cercano"] <= radio).sum()
+    for radio in radios_apertura
+])
+estrellas_en_limite = (df["dist_vecino_mas_cercano"] <= limite).sum()
+
+tabla_radio_vecino = pd.DataFrame({
+    "radio_apertura_pix": radios_apertura,
+    "n_estrellas_con_vecino_dentro": numero_estrellas
+})
+tabla_radio_vecino.to_csv(
+    "m92011_numero_estrellas_vs_radio_vecino_cercano.csv",
+    index=False
+)
+
+plt.figure(figsize=(8, 5))
+ax = plt.gca()
+
+ax.plot(
+    radios_apertura,
+    numero_estrellas,
+    color="tab:blue",
+    linewidth=2
+)
+ax.axvline(
+    limite,
+    color="tab:red",
+    linestyle="--",
+    linewidth=1.5,
+    label=f"Radio usado = {limite:.3f} pix"
+)
+ax.scatter(
+    [limite],
+    [estrellas_en_limite],
+    color="tab:red",
+    zorder=3,
+    label=f"{estrellas_en_limite} estrellas"
+)
+
+ax.set_xlabel("Radio de apertura [pixeles]")
+ax.set_ylabel("Número de estrellas")
+ax.set_title("Estrellas con vecino más cercano dentro del radio de apertura")
+ax.grid(True, alpha=0.25)
+ax.legend()
+plt.tight_layout()
+plt.savefig("m92011_numero_estrellas_vs_radio_vecino_cercano.png", dpi=200)
+plt.close()
+
+# =====================================================
 # GRAFICAR VECINO MÁS CERCANO DE CADA ESTRELLA
 # =====================================================
 indices_vecinos = df["indice_vecino_mas_cercano"].to_numpy(dtype=int) - 1
@@ -221,5 +278,7 @@ print("m92011_aceptadas_aisladas.coo")
 print("m92011_rechazadas_vecino_cercano.coo")
 print("m92011_tabla_vecinos_cercanos.csv")
 print("m92011_pares_vecino_cercano.csv")
+print("m92011_numero_estrellas_vs_radio_vecino_cercano.csv")
+print("m92011_numero_estrellas_vs_radio_vecino_cercano.png")
 print("m92011_vecinos_mas_cercanos.png")
 print("m92011_rechazadas_vecinos_detalle.png")
