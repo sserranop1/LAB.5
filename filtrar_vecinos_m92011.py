@@ -115,22 +115,24 @@ pares_cercanos.to_csv("m92011_pares_vecino_cercano.csv", index=False)
 
 # =====================================================
 # GRAFICAR NÚMERO DE ESTRELLAS VS RADIO DE APERTURA
-# Respecto a la distancia de cada estrella a su vecino más cercano.
+# Conteo por intervalos de radio, no acumulativo.
 # =====================================================
-radios_apertura = np.linspace(
-    0,
-    df["dist_vecino_mas_cercano"].max(),
-    300
-)
-numero_estrellas = np.array([
-    (df["dist_vecino_mas_cercano"] <= radio).sum()
-    for radio in radios_apertura
-])
+delta_radio = 1.0
+dist_vecino = df["dist_vecino_mas_cercano"].to_numpy()
+radio_max = np.ceil(dist_vecino.max() / delta_radio) * delta_radio
+bordes_radio = np.arange(0, radio_max + delta_radio, delta_radio)
+numero_estrellas, _ = np.histogram(dist_vecino, bins=bordes_radio)
+radios_inicio = bordes_radio[:-1]
+radios_fin = bordes_radio[1:]
+radios_centro = radios_inicio + delta_radio / 2
 estrellas_en_limite = (df["dist_vecino_mas_cercano"] <= limite).sum()
 
 tabla_radio_vecino = pd.DataFrame({
-    "radio_apertura_pix": radios_apertura,
-    "n_estrellas_con_vecino_dentro": numero_estrellas
+    "radio_inicio_pix": radios_inicio,
+    "radio_fin_pix": radios_fin,
+    "radio_centro_pix": radios_centro,
+    "delta_radio_pix": delta_radio,
+    "n_estrellas_en_delta": numero_estrellas
 })
 tabla_radio_vecino.to_csv(
     "m92011_numero_estrellas_vs_radio_vecino_cercano.csv",
@@ -140,11 +142,16 @@ tabla_radio_vecino.to_csv(
 plt.figure(figsize=(8, 5))
 ax = plt.gca()
 
-ax.plot(
-    radios_apertura,
+ax.bar(
+    radios_inicio,
     numero_estrellas,
+    width=delta_radio,
+    align="edge",
     color="tab:blue",
-    linewidth=2
+    edgecolor="black",
+    linewidth=0.4,
+    alpha=0.85,
+    label=f"Delta = {delta_radio:.1f} pix"
 )
 ax.axvline(
     limite,
@@ -153,17 +160,9 @@ ax.axvline(
     linewidth=1.5,
     label=f"Radio usado = {limite:.3f} pix"
 )
-ax.scatter(
-    [limite],
-    [estrellas_en_limite],
-    color="tab:red",
-    zorder=3,
-    label=f"{estrellas_en_limite} estrellas"
-)
-
 ax.set_xlabel("Radio de apertura [pixeles]")
-ax.set_ylabel("Número de estrellas")
-ax.set_title("Estrellas con vecino más cercano dentro del radio de apertura")
+ax.set_ylabel("Número de estrellas en cada delta")
+ax.set_title("Estrellas por intervalo de distancia al vecino más cercano")
 ax.grid(True, alpha=0.25)
 ax.legend()
 plt.tight_layout()
